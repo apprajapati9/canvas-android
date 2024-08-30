@@ -14,6 +14,12 @@ import android.util.AttributeSet
 import android.util.Log
 import android.view.View
 import androidx.core.graphics.toColor
+import androidx.lifecycle.findViewTreeLifecycleOwner
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.setViewTreeLifecycleOwner
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlin.math.sin
 import kotlin.random.Random
 
@@ -21,18 +27,19 @@ import kotlin.random.Random
 var CANVAS_WIDTH    = 0f
 var CANVAS_HEIGHT   = 0f
 
-class SolarView(context: Context, attrs: AttributeSet?= null) : View(context, attrs), Runnable{
+class SolarView(context: Context, attrs: AttributeSet?= null) : View(context, attrs){
 
     private var angle = 0f //angle rotation for earth/sun
     private var moonAngle = 180f // self explanatory
 
     private val paint = Paint()
     private var startThread = false
-    private var callerThread: Thread? = null
 
     private var points = arrayListOf(RandomCircles()) //random circle points list
 
     private var colorPercent = 0f // to lerp between two values of color
+
+    private var job : Job ?= null
 
     init {
         paint.isAntiAlias = true
@@ -128,11 +135,12 @@ class SolarView(context: Context, attrs: AttributeSet?= null) : View(context, at
 
     }
 
-    override fun run() {
+    private suspend fun run() {
+        Log.d("Ajay", "Thread name ${Thread.currentThread().name}")
         while(startThread){
             postInvalidate()
             try {
-                Thread.sleep(40)
+                delay(40)
                 angle += 1
                 moonAngle += 3f
                 if(angle > 360){
@@ -145,8 +153,6 @@ class SolarView(context: Context, attrs: AttributeSet?= null) : View(context, at
 
                 colorPercent = (sin(angle*angle) + 1)/2
                 pointsMove()
-
-                Log.d("ajay", "$angle")
             }catch (e: Exception){
                 e.printStackTrace()
             }
@@ -165,18 +171,21 @@ class SolarView(context: Context, attrs: AttributeSet?= null) : View(context, at
     }
 
     fun startThread() {
-        if (!startThread) {
-            startThread = true
-            callerThread = Thread(this)
-            callerThread!!.start()
+        Log.d("Ajay", "Thread start!")
+        job = findViewTreeLifecycleOwner()?.lifecycleScope?.launch {
+            if(!startThread){
+                startThread = true
+                run()
+            }
         }
     }
 
     fun stopThread() {
+        Log.d("Ajay", "Thread stop!")
         if (startThread) {
             startThread = false
-            callerThread!!.interrupt()
-            callerThread = null
+            job?.cancel()
+            job = null
         }
     }
 
@@ -201,7 +210,6 @@ class SolarView(context: Context, attrs: AttributeSet?= null) : View(context, at
         val r = a.red() + (b.red() - a.red()) * p
         val g = a.green() + (b.green() - a.green()) * p
         val b = a.blue() + (b.blue() - a.blue()) * p
-
         val c = Color.rgb(r, g, b)
 
         return c
