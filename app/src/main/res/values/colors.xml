@@ -2,4 +2,9 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+
+    <color name="solar_background">@color/transparent</color>
+    <color name="transparent">#00000000</color>
+
+    <color name="sun_shadow_color">#AA4203</color>
 </resources>

@@ -21,6 +21,8 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:gravity="center"
+        android:shadowColor="@android:color/holo_green_dark"
+        android:shadowRadius="15.0"
         android:text="@string/solar_view_text"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

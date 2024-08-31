@@ -11,13 +11,13 @@ import androidx.core.view.WindowInsetsCompat
 class MainActivity : AppCompatActivity() {
     private lateinit var solarView: SolarView
     override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
         //Setting navbar and status bar color from here.
         enableEdgeToEdge(
-            navigationBarStyle = SystemBarStyle.dark(ContextCompat.getColor(this, R.color.black)),
-            statusBarStyle = SystemBarStyle.dark(ContextCompat.getColor(this, R.color.black))
+            navigationBarStyle = SystemBarStyle.dark(ContextCompat.getColor(this, R.color.transparent)),
+            statusBarStyle = SystemBarStyle.dark(ContextCompat.getColor(this, R.color.transparent))
         ) // This determined status bar and navigation bar color, investigate.
 
+        super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())

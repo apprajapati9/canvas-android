@@ -13,6 +13,7 @@ import android.graphics.PorterDuff
 import android.util.AttributeSet
 import android.util.Log
 import android.view.View
+import androidx.core.content.ContextCompat
 import androidx.core.graphics.toColor
 import androidx.lifecycle.findViewTreeLifecycleOwner
 import androidx.lifecycle.lifecycleScope
@@ -63,7 +64,7 @@ class SolarView(context: Context, attrs: AttributeSet?= null) : View(context, at
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-        canvas.drawColor(Color.WHITE, PorterDuff.Mode.CLEAR);
+        canvas.drawColor(ContextCompat.getColor(context, R.color.solar_background)); //PorterDuff.Mode.CLEAR -> read more about this.
         drawPlanets(canvas)
     }
 
@@ -106,9 +107,11 @@ class SolarView(context: Context, attrs: AttributeSet?= null) : View(context, at
         paint.color = Color.parseColor("#AA4203")
         canvas.translate(width/2.toFloat(), height/2.toFloat())
         canvas.rotate(angle)
-        canvas.drawCircle(0f, 0f, 80f, paint) //The sun circle
+        paint.setShadowLayer(80f, 0f, 0f, Color.parseColor("#AA4210"))
+        canvas.drawCircle(0f, 0f, 60f, paint) //The sun circle
         canvas.restore()
 
+        paint.clearShadowLayer()
         paint.pathEffect = PathEffect()
         paint.style = Paint.Style.STROKE
         paint.strokeWidth = 0.8f
@@ -255,7 +258,7 @@ class RandomCircles {
     }
 
     private fun getDirection(): Int {
-        return Random.nextInt(1, 4)
+        return Random.nextInt(1, 8)
     }
 
     fun move(){
@@ -271,6 +274,22 @@ class RandomCircles {
             }
             4 -> {
                 position.y -= velocity
+            }
+            5 -> {
+                position.x += velocity
+                position.y += velocity
+            }
+            6 -> {
+                position.x -= velocity
+                position.y -= velocity
+            }
+            7-> {
+                position.x += velocity
+                position.y -= velocity
+            }
+            8-> {
+                position.x -= velocity
+                position.y += velocity
             }
         }
 
