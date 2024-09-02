@@ -1,5 +1,6 @@
 package com.apprajapati.solarsystem
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Color
@@ -12,6 +13,9 @@ import android.graphics.PointF
 import android.graphics.PorterDuff
 import android.util.AttributeSet
 import android.util.Log
+import android.view.MotionEvent
+import android.view.MotionEvent.ACTION_DOWN
+import android.view.MotionEvent.ACTION_UP
 import android.view.View
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.toColor
@@ -21,6 +25,7 @@ import androidx.lifecycle.setViewTreeLifecycleOwner
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlin.math.cos
 import kotlin.math.sin
 import kotlin.random.Random
 
@@ -36,7 +41,7 @@ class SolarView(context: Context, attrs: AttributeSet?= null) : View(context, at
     private val paint = Paint()
     private var startThread = false
 
-    private var points = arrayListOf(RandomCircles()) //random circle points list
+    private var points = arrayListOf(RandomCircle()) //random circle points list
 
     private var colorPercent = 0f // to lerp between two values of color
 
@@ -87,15 +92,33 @@ class SolarView(context: Context, attrs: AttributeSet?= null) : View(context, at
         paint.color = Color.parseColor("#FFFF00")
 
 
-        val start = Color.parseColor("#fffff5")
+        val start = Color.parseColor("#FFFF00") //  #fffff5
         // change this color to transition from one to another. currently its same.
-        val end = Color.parseColor("#fffff5") //#FFFF00
+        val end = Color.parseColor("#FFFF00") //#FFFF00
 
 
         val c = lerpColor(start.toColor(), end.toColor(), colorPercent)
         paint.color = c
+        paint.style = Paint.Style.FILL
+        paint.strokeWidth = 0.01f
         for(point in points){
-            canvas.drawCircle(point.getPosition().x, point.getPosition().y, point.getR(), paint)
+            //canvas.drawCircle(point.getPosition().x, point.getPosition().y, point.getR(), paint)
+            val x = point.getPosition().x
+            val y = point.getPosition().y
+            for(i in 0..360 step 72){
+                paint.style = Paint.Style.FILL
+                val px = x + point.getR() * cos(degreesToRadians(i.toFloat()))
+                val py = y + point.getR() * sin(degreesToRadians(i.toFloat()))
+
+                canvas.drawPoint(px.toFloat(), py.toFloat(), paint)
+
+                val p1x = x + point.getR() * cos(degreesToRadians(i.toFloat()+144))
+                val p1y = y + point.getR() * sin(degreesToRadians(i.toFloat()+144))
+
+                canvas.drawPoint(p1x.toFloat(), p1y.toFloat(), paint)
+
+                canvas.drawLine(px.toFloat(),py.toFloat(), p1x.toFloat(), p1y.toFloat(), paint)
+            }
         }
         canvas.restore()
 
@@ -136,6 +159,10 @@ class SolarView(context: Context, attrs: AttributeSet?= null) : View(context, at
         //canvas.drawLine(-50f, -50f, 50f, 50f, paint)
         canvas.restore()
 
+    }
+
+    private fun degreesToRadians(degrees: Float): Double{
+        return Math.PI * degrees / 180
     }
 
     private suspend fun run() {
@@ -198,10 +225,10 @@ class SolarView(context: Context, attrs: AttributeSet?= null) : View(context, at
         }
     }
 
-    private fun randomPoints(): ArrayList<RandomCircles> {
+    private fun randomPoints(): ArrayList<RandomCircle> {
         points.clear()
-        for(i in 0..200){
-            val v = RandomCircles()
+        for(i in 0..10){
+            val v = RandomCircle()
             points.add(v)
         }
         return points
@@ -217,9 +244,35 @@ class SolarView(context: Context, attrs: AttributeSet?= null) : View(context, at
 
         return c
     }
+
+    fun addPoints(point: PointF){
+        repeat(50){
+            val p = RandomCircle()
+            p.setPosition(point)
+            points.add(p)
+        }
+    }
+
+
+    @SuppressLint("ClickableViewAccessibility")
+    override fun onTouchEvent(event: MotionEvent?): Boolean {
+        val action = event!!.action
+
+        when(action){
+            ACTION_DOWN -> {
+                Log.d("Ajay", "Pressed X ${event.x/100}, Y ${event.y/100}")
+                val point = PointF(event.x/100, event.y/100)
+                addPoints(point)
+                return true
+            }
+        }
+
+        return false
+        //return super.onTouchEvent(event)
+    }
 }
 
-class RandomCircles {
+class RandomCircle {
     private var position = PointF(0f,0f)
     private var velocity = 0f // 0.1 to 1
     private var radius = 0f
@@ -246,7 +299,7 @@ class RandomCircles {
     }
 
     private fun getRadius(): Float {
-        return Random.nextDouble(0.01, 0.04).toFloat()
+        return Random.nextDouble(0.01, 0.2).toFloat()
     }
 
     fun getPosition() : PointF {
@@ -258,7 +311,12 @@ class RandomCircles {
     }
 
     private fun getDirection(): Int {
-        return Random.nextInt(1, 8)
+        return Random.nextInt(1, 9) // 1-8, 9, until 9 isn't inclusive.
+    }
+
+    fun setPosition(point: PointF) {
+        this.position.x = point.x
+        this.position.y = point.y
     }
 
     fun move(){
