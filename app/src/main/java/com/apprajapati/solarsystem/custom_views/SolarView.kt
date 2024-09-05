@@ -1,5 +1,7 @@
-package com.apprajapati.solarsystem
+package com.apprajapati.solarsystem.custom_views
 
+import com.apprajapati.solarsystem.R
+import kotlinx.coroutines.Dispatchers
 import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Canvas
@@ -10,18 +12,15 @@ import android.graphics.DiscretePathEffect
 import android.graphics.Paint
 import android.graphics.PathEffect
 import android.graphics.PointF
-import android.graphics.PorterDuff
 import android.util.AttributeSet
 import android.util.Log
 import android.view.MotionEvent
 import android.view.MotionEvent.ACTION_DOWN
-import android.view.MotionEvent.ACTION_UP
 import android.view.View
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.toColor
 import androidx.lifecycle.findViewTreeLifecycleOwner
 import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.setViewTreeLifecycleOwner
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -202,7 +201,7 @@ class SolarView(context: Context, attrs: AttributeSet?= null) : View(context, at
 
     fun startThread() {
         Log.d("Ajay", "Thread start!")
-        job = findViewTreeLifecycleOwner()?.lifecycleScope?.launch {
+        job = findViewTreeLifecycleOwner()?.lifecycleScope?.launch(Dispatchers.IO) {
             if(!startThread){
                 startThread = true
                 run()
@@ -245,7 +244,7 @@ class SolarView(context: Context, attrs: AttributeSet?= null) : View(context, at
         return c
     }
 
-    fun addPoints(point: PointF){
+    private fun addPoints(point: PointF){
         repeat(50){
             val p = RandomCircle()
             p.setPosition(point)
