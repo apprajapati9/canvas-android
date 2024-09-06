@@ -46,6 +46,15 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    override fun onResume() {
+        super.onResume()
+
+    }
+
+    override fun onPause() {
+        super.onPause()
+    }
+
     private fun replaceFragment(fragment: Fragment){
         val ft: FragmentTransaction = supportFragmentManager.
         beginTransaction().
