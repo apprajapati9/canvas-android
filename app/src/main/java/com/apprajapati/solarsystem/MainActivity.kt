@@ -11,6 +11,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentTransaction
 import com.apprajapati.solarsystem.databinding.ActivityMainBinding
+import com.apprajapati.solarsystem.fragments.BouncingBallFragment
 import com.apprajapati.solarsystem.fragments.PCPointsFragment
 import com.apprajapati.solarsystem.fragments.SolarViewFragment
 
@@ -43,6 +44,10 @@ class MainActivity : AppCompatActivity() {
 
         binding.pcPointsFragmentButton.setOnClickListener{
             replaceFragment(PCPointsFragment())
+        }
+
+        binding.bouncingBallButton.setOnClickListener(){
+            replaceFragment(BouncingBallFragment())
         }
     }
 

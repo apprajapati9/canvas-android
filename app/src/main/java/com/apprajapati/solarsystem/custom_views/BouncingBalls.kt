@@ -13,14 +13,16 @@ import android.view.MotionEvent
 import android.view.View
 import androidx.lifecycle.findViewTreeLifecycleOwner
 import androidx.lifecycle.lifecycleScope
+import com.apprajapati.solarsystem.common.getRandomColor
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlin.math.sin
 import kotlin.random.Random
 
 open class GraphicalObject(private var position: PointF) {
 
-    private var velocity = 10f
+    private var velocity = Random.nextInt(6, 11)
 
     fun moveRight(){
         position.x += velocity
@@ -38,10 +40,14 @@ open class GraphicalObject(private var position: PointF) {
         position.y += velocity
     }
 
-    fun setVelocity(v: Float){
+    fun setVelocity(v: Int){
         velocity = v
     }
 }
+
+//open class Bouncer(position: PointF, area: RectF){
+//
+//}
 
 class Square(private var squarePosition: PointF,
              private val area : RectF,
@@ -54,16 +60,26 @@ class Square(private var squarePosition: PointF,
     }
 
     private val squareSize = Random.nextInt(1, 60).toFloat()
+    private var rotationAngle = 1f
 
     fun drawSquare(canvas: Canvas){
-        val rectF = RectF(squarePosition.x, squarePosition.y, squarePosition.x+ squareSize, squarePosition.y + squareSize)
+        canvas.save()
+        canvas.translate(squarePosition.x, squarePosition.y)
+        canvas.rotate(rotationAngle)
+        val rectF = RectF(0f-squareSize/2, 0f-squareSize/2, squareSize/2, squareSize/2)
         canvas.drawRect(rectF, squarePaint)
+        canvas.restore()
+
     }
 
     override fun moveDown(){
         if(squarePosition.y >= area.height()) {
             resetPositionY()
         }
+        if(rotationAngle >= 360){
+            rotationAngle = 1f
+        }
+        rotationAngle += 5
         super.moveDown()
     }
 
@@ -83,15 +99,25 @@ class Ball(private var ballPosition: PointF = PointF(0f,0f),
     }
 
     private val radius = Random.nextInt(1,61).toFloat()
+    private var angle = 1f
 
     fun drawBall(canvas: Canvas){
-        canvas.drawCircle(ballPosition.x, ballPosition.y, radius, paint )
+        canvas.save()
+        canvas.translate(ballPosition.x, ballPosition.y)
+        // canvas.rotate(angle)
+        // in case if we want to rotate but rotation is not visible without having something with diff color
+        canvas.drawCircle(0f, 0f, radius, paint)
+        canvas.restore()
     }
 
     override fun moveDown(){
         if(ballPosition.y - radius >= area.height()) {
             resetPositionY()
         }
+        if( angle >= 360){
+            angle = 0f
+        }
+        angle++
         super.moveDown()
     }
 
@@ -129,7 +155,7 @@ class BouncingBallsView(
 
             val points = PointF(randomX, randomY)
 
-            val color = Color.argb(255, Random.nextInt(256), Random.nextInt(256), Random.nextInt(256));
+            val color = getRandomColor()
             if(Random.nextInt(0,2) == 1){
                 val ball = Ball(points, area, color)
                 list.add(ball)
